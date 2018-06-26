@@ -11,8 +11,6 @@ import android.widget.LinearLayout;
 public class MainMenu
         extends AppCompatActivity
     {
-    private final String[] MENU_OPTIONS = {"People", "Spots", "Calendar", "Options"};
-
     private LinearLayout menuWrapper;
 
     @Override

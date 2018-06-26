@@ -15,7 +15,6 @@ public class NewContactActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_contact_view);
-
     }
 
     public void processNewContactInformation(View view)
@@ -34,13 +33,14 @@ public class NewContactActivity
 
         if(firstName.isEmpty())
         {
-            //DO NOTHING
+
         }
         else
         {
             Contact contact = new Contact(firstName, lastName, emailAddress, phoneNumber);
             Intent intent = new Intent(this, ContactActivity.class);
             intent.putExtra("EXTRA_CONTACT", contact);
+            startActivity(intent);
         }
     }
 
