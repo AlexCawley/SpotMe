@@ -3,6 +3,7 @@ package com.example.e4977.spotme;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -13,6 +14,8 @@ import java.util.ArrayList;
 public class ContactActivity
         extends AppCompatActivity
 {
+
+    private final String SAVED_INSTANCE_STATE_CONTACTS = "CONTACTS";
 
     ArrayList<Contact> contacts;
     ScrollView contactViewWrapper;
@@ -37,6 +40,14 @@ public class ContactActivity
         {
             displayContact(contacts.get(i));
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+        Log.i("ContactActivity", "Saving instance state");
+        savedInstanceState.putParcelableArrayList(SAVED_INSTANCE_STATE_CONTACTS, contacts);
     }
 
     public boolean displayContact(Contact contact)
