@@ -14,7 +14,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/firstNameField"
+        android:id="@+id/emailField"
         android:inputType="textEmailAddress"/>
 
     <TextView
@@ -26,19 +26,19 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/lastNameField"
+        android:id="@+id/passwordField"
         android:inputType="textPassword"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Login"
-        android:onClick="processLogin"/>
+        android:id="@+id/loginButton"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Don't have an account?"
-        android:onClick="intentToSignup"/>
+        android:id="@+id/signupButton"/>
 
 </LinearLayout>

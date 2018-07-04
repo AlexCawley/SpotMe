@@ -9,24 +9,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
-        android:text="FirstName: "/>
+        android:text="Full Name: "/>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/firstNameField"
-        android:inputType="textPersonName"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:text="Last Name: "/>
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lastNameField"
+        android:id="@+id/fullNameField"
         android:inputType="textPersonName"/>
 
     <TextView
@@ -69,6 +57,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Done"
-        android:onClick="intentToMainMenu"/>
+        android:id="@+id/registerButton"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Already registered? Login."
+        android:id="@+id/backToLoginButton"/>
 
 </LinearLayout>
