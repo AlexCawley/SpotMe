@@ -37,11 +37,11 @@ public class SignupActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        inputFullName = (EditText) findViewById(R.id.fullNameField);
-        inputEmail = (EditText) findViewById(R.id.emailAddressField);
-        inputPassword = (EditText) findViewById(R.id.passwordField);
-        btnRegister = (Button) findViewById(R.id.registerButton);
-        btnLinkToLogin = (Button) findViewById(R.id.backToLoginButton);
+        inputFullName = findViewById(R.id.fullNameField);
+        inputEmail = findViewById(R.id.emailAddressField);
+        inputPassword = findViewById(R.id.passwordField);
+        btnRegister = findViewById(R.id.registerButton);
+        btnLinkToLogin = findViewById(R.id.backToLoginButton);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);

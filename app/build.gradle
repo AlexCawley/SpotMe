@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+    dataBinding.enabled = true
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.e4977.spotme"
@@ -25,6 +26,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    compile 'com.mcxiaoke.volley:library-aar:1.0.0'
-    compile 'com.android.support:design:27.1.1'
+    implementation 'com.mcxiaoke.volley:library-aar:1.0.0'
+    implementation 'com.android.support:design:27.1.1'
 }
