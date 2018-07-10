@@ -6,158 +6,183 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class SQLiteHandler extends SQLiteOpenHelper
 {
 
     private static final String TAG = SQLiteHandler.class.getSimpleName();
 
-    // All Static variables
-    // Database Version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
 
-    // Database Name
-    private static final String DATABASE_NAME = "android_api";
-
-    // Login table name
-    private static final String TABLE_USER = "user";
-    private static final String TABLE_CONTACT = "contact";
-
-    // Login Table Columns names
-    private static final String KEY_USER_ID = "user_id";
-    private static final String KEY_CONTACT_ID = "contact_id";
-    private static final String KEY_NAME = "name";
-    private static final String KEY_EMAIL = "email";
-    private static final String KEY_UID = "uid";
-    private static final String KEY_CREATED_AT = "created_at";
-    private static final String KEY_PHONE_NUMBER = "phone_number";
+    private static final String DATABASE_NAME = "SpotMe";
 
     public SQLiteHandler(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db)
     {
-        String CREATE_LOGIN_TABLE = "CREATE TABLE " + TABLE_USER + "("
-                + KEY_USER_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
-                + KEY_CREATED_AT + " TEXT" + ")";
-        db.execSQL(CREATE_LOGIN_TABLE);
-
-        String CREATE_CONTACT_TABLE = "CREATE TABLE " + TABLE_CONTACT + "("
-                + KEY_CONTACT_ID + " INTEGER PRIMARY KEY," + KEY_NAME + " TEXT,"
-                + KEY_EMAIL + " TEXT UNIQUE," + KEY_UID + " TEXT,"
-                + KEY_PHONE_NUMBER + " INTEGER," + KEY_CREATED_AT + " TEXT,"
-                + "FOREIGN KEY(" + KEY_USER_ID +")" + ")";
-        db.execSQL(CREATE_CONTACT_TABLE);
-
+        db.execSQL(UserDBContract.User.CREATE_USER_TABLE);
+        db.execSQL(ContactDBContract.Contact.CREATE_CONTACT_TABLE);
 
         Log.d(TAG, "Database tables created");
     }
 
-    // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
-        // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
-
-        // Create tables again
+        db.execSQL(UserDBContract.User.DELETE_USER_TABLE);
+        db.execSQL(ContactDBContract.Contact.DELETE_CONTACT_TABLE);
         onCreate(db);
     }
-    
-    public void addUser(String name, String email, String uid, String created_at)
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion)
+    {
+        onUpgrade(db, oldVersion, newVersion);
+    }
+
+    public void addUser(String name, String email, String password)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, name);
-        values.put(KEY_EMAIL, email);
-        values.put(KEY_UID, uid);
-        values.put(KEY_CREATED_AT, created_at);
 
-        long id = db.insert(TABLE_USER, null, values);
-        db.close();
+        values.put(UserDBContract.User.COLUMN_NAME, name);
+        values.put(UserDBContract.User.COLUMN_EMAIL, email);
+        values.put(UserDBContract.User.COLUMN_PASSWORD, password);
+        values.put(UserDBContract.User.COLUMN_CREATED_AT, getCurrentTimeString());
+
+        long id = db.insert(UserDBContract.User.TABLE_NAME, null, values);
 
         Log.d(TAG, "New user inserted into sqlite: " + id);
     }
 
-    public void addContact(String name, String email, String uid, String phone, String created_at)
+    public void addContact(String name, String email, String phone)
     {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_NAME, name);
-        values.put(KEY_EMAIL, email);
-        values.put(KEY_UID, uid);
-        values.put(KEY_PHONE_NUMBER, phone);
-        values.put(KEY_CREATED_AT, created_at);
+        values.put(ContactDBContract.Contact.COLUMN_NAME, name);
+        values.put(ContactDBContract.Contact.COLUMN_EMAIL, email);
+        values.put(ContactDBContract.Contact.COLUMN_PHONE, phone);
+        values.put(ContactDBContract.Contact.COLUMN_CREATED_AT, getCurrentTimeString());
 
-        long id = db.insert(TABLE_CONTACT, null, values);
-        db.close();
+        long id = db.insert(ContactDBContract.Contact.TABLE_NAME, null, values);
 
         Log.d(TAG, "New contact inserted into sqlite: " + id);
     }
 
-    public HashMap<String, String> getUserDetails()
+    public ArrayList<Contact> getAllContacts()
     {
-        HashMap<String, String> user = new HashMap<String, String>();
-        String selectQuery = "SELECT  * FROM " + TABLE_USER;
-
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
 
-        cursor.moveToFirst();
-        if (cursor.getCount() > 0)
+        ArrayList<Contact> contacts = new ArrayList<Contact>();
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + ContactDBContract.Contact.TABLE_NAME, null);
+        if(cursor.moveToFirst())
         {
-            user.put("name", cursor.getString(1));
-            user.put("email", cursor.getString(2));
-            user.put("uid", cursor.getString(3));
-            user.put("created_at", cursor.getString(4));
+            do
+            {
+                String name = cursor.getString(1);
+                String email = cursor.getString(2);
+                String phone = cursor.getString(3);
+                Contact contact = new Contact(name, email, phone);
+                contacts.add(contact);
+            } while (cursor.moveToNext());
         }
-        cursor.close();
-        db.close();
-
-        Log.d(TAG, "Fetching user from Sqlite: " + user.toString());
-
-        return user;
+        return contacts;
     }
 
-    public HashMap<String, String> getContactDetails()
+    public User authenticateUser(User userToFind)
     {
-        HashMap<String, String> contact = new HashMap<String, String>();
-        String selectQuery = "SELECT * FROM " + TABLE_CONTACT;
-
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
 
-        cursor.moveToFirst();
-        if(cursor.getCount() > 0)
+        String[] projection =
         {
-            contact.put("name", cursor.getString(1));
-            contact.put("email", cursor.getString(2));
-            contact.put("uid", cursor.getString(3));
-            contact.put("phone_number", cursor.getString(4));
-            contact.put("created_at", cursor.getString(5));
+            UserDBContract.User._ID,
+            UserDBContract.User.COLUMN_NAME,
+            UserDBContract.User.COLUMN_EMAIL,
+            UserDBContract.User.COLUMN_PASSWORD
+        };
+
+        String selection = UserDBContract.User.COLUMN_EMAIL + " = ?";
+        String[] selectionArgs =
+        {
+                userToFind.email
+        };
+
+        Cursor cursor = db.query(UserDBContract.User.TABLE_NAME,
+                                 projection,
+                                 selection,
+                                 selectionArgs,
+                                 null,
+                                 null,
+                                 null);
+
+        if (cursor != null && cursor.getCount() > 0)
+        {
+            cursor.moveToFirst();
+
+            User userTocheck = new User(cursor.getString(0), cursor.getString(1),
+                                  cursor.getString(2), cursor.getString(3));
+
+            if (userToFind.password.equalsIgnoreCase(userTocheck.password))
+            {
+                Log.d(TAG, "Fetching user from Sqlite: " + userTocheck.toString());
+                return userTocheck;
+            }
         }
-        cursor.close();
-        db.close();
 
-        Log.d(TAG, "Fetching contact from sqlite: " + contact.toString());
+        Log.d(TAG, "User no found");
 
-        return contact;
+        return null;
+    }
+
+    public boolean emailExists(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] projection =
+                {
+                        UserDBContract.User._ID,
+                        UserDBContract.User.COLUMN_NAME,
+                        UserDBContract.User.COLUMN_EMAIL,
+                        UserDBContract.User.COLUMN_PASSWORD
+                };
+
+        String selection = UserDBContract.User.COLUMN_EMAIL + " = ?";
+        String[] selectionArgs =
+                {
+                        email
+                };
+
+        Cursor cursor = db.query(UserDBContract.User.TABLE_NAME,
+                                 projection,
+                                 selection,
+                                 selectionArgs,
+                                 null,
+                                 null,
+                                 null);
+
+        if (cursor != null && cursor.getCount() > 0)
+        {
+            cursor.moveToFirst();
+            return true;
+        }
+
+        return false;
     }
 
     public void deleteUsers()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        // Delete All Rows
-        db.delete(TABLE_USER, null, null);
+        db.delete(UserDBContract.User.TABLE_NAME, null, null);
         db.close();
 
         Log.d(TAG, "Deleted all user info from sqlite");
@@ -166,11 +191,40 @@ public class SQLiteHandler extends SQLiteOpenHelper
     public void deleteContacts()
     {
         SQLiteDatabase db = this.getWritableDatabase();
-        // Delete All Rows
-        db.delete(TABLE_CONTACT, null, null);
+        db.delete(ContactDBContract.Contact.DELETE_CONTACT_TABLE, null, null);
         db.close();
 
         Log.d(TAG, "Deleted all contact info from sqlite");
+    }
+
+    private String getCurrentTimeString()
+    {
+        try {
+            Date today = Calendar.getInstance().getTime();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            String dateString = simpleDateFormat.format(today);
+            return dateString;
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Error", e);
+            return "00/00/0000";
+        }
+    }
+
+    public static boolean doesTableExist(SQLiteDatabase db, String tableName)
+    {
+        Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
+
+        if (cursor != null)
+        {
+            if (cursor.getCount() > 0)
+            {
+                cursor.close();
+                return true;
+            }
+            cursor.close();
+        }
+        return false;
     }
 
 }

@@ -5,28 +5,21 @@ import android.os.Parcelable;
 
 public class Contact implements Parcelable
 {
-    private String firstName;
-    private String lastName;
+    private String name;
     private String email;
     private String phone;
 
-    public Contact (String firstName,
-                    String lastName,
+    public Contact (String name,
                     String email,
                     String phone)
     {
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
         this.email = email;
         this.phone = phone;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
@@ -46,10 +39,8 @@ public class Contact implements Parcelable
     @Override
     public void writeToParcel(Parcel out, int flags)
     {
-        out.writeString(firstName);
-        out.writeString(lastName);
+        out.writeString(name);
         out.writeString(email);
-
         out.writeString(phone);
     }
 
@@ -68,8 +59,7 @@ public class Contact implements Parcelable
 
     private Contact (Parcel in)
     {
-        firstName = in.readString();
-        lastName = in.readString();
+        name = in.readString();
         email = in.readString();
         phone = in.readString();
     }

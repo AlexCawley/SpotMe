@@ -2,6 +2,7 @@ package com.example.e4977.spotme;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.View;
 
 import android.app.Activity;
@@ -30,7 +31,6 @@ public class LoginActivity extends Activity
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
-    private SessionManager session;
     private SQLiteHandler db;
 
     @Override
@@ -43,26 +43,11 @@ public class LoginActivity extends Activity
         btnLogin = findViewById(R.id.loginButton);
         btnLinkToRegister = findViewById(R.id.signupButton);
 
-        // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
 
-        // SQLite database handler
         db = new SQLiteHandler(getApplicationContext());
 
-        // Session manager
-        session = new SessionManager(getApplicationContext());
-
-        // Check if user is already logged in or not
-        if (session.isLoggedIn())
-        {
-            // User is already logged in. Take them to main activity
-            Intent intent = new Intent(LoginActivity.this, MainMenu.class);
-            startActivity(intent);
-            finish();
-        }
-
-        // Login button Click Event
         btnLogin.setOnClickListener(new View.OnClickListener()
         {
 
@@ -71,17 +56,14 @@ public class LoginActivity extends Activity
                 String email = inputEmail.getText().toString().trim();
                 String password = inputPassword.getText().toString().trim();
 
-                // Check for empty data in the form
-                if (!email.isEmpty() && !password.isEmpty())
+                if (validate(email, password))
                 {
-                    // login user
                     checkLogin(email, password);
                 }
                 else
                 {
-                    // Prompt user to enter credentials
                     Toast.makeText(getApplicationContext(),
-                            "Incorrect username and password, please try again!", Toast.LENGTH_LONG)
+                            "Username and password do not match, please try again", Toast.LENGTH_LONG)
                             .show();
                 }
 
@@ -102,100 +84,47 @@ public class LoginActivity extends Activity
         });
     }
 
-    /**
-     * function to verify login details in mysql db
-     * */
     private void checkLogin(final String email, final String password) {
-        // Tag used to cancel the request
-        String tag_string_req = "req_login";
 
         pDialog.setMessage("Logging in ...");
         showDialog();
 
-        StringRequest strReq = new StringRequest(Method.POST,
-                AppConfig.URL_LOGIN, new Response.Listener<String>()
+        User currentUser = db.authenticateUser(new User(null, null, email, password));
+
+        if (currentUser != null)
         {
+            hideDialog();
+            Intent intent = new Intent(LoginActivity.this, MainMenu.class);
+            startActivity(intent);
+            finish();
+        }
+        else
+        {
+            hideDialog();
+            Toast.makeText(getApplicationContext(), "Username and password don't match, please try again.", Toast.LENGTH_LONG).show();
+        }
+    }
 
-            @Override
-            public void onResponse(String response)
+    public boolean validate(String email, String password) {
+        boolean valid;
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() || password.isEmpty())
+        {
+            valid = false;
+        }
+        else
+        {
+            if (password.length() > 5)
             {
-                Log.d(TAG, "Login Response: " + response.toString());
-                hideDialog();
-
-                try
-                {
-                    JSONObject jObj = new JSONObject(response);
-                    boolean error = jObj.getBoolean("error");
-
-                    // Check for error node in json
-                    if (!error)
-                    {
-                        // user successfully logged in
-                        // Create login session
-                        session.setLogin(true);
-
-                        // Now store the user in SQLite
-                        String uid = jObj.getString("uid");
-
-                        JSONObject user = jObj.getJSONObject("user");
-                        String name = user.getString("name");
-                        String email = user.getString("email");
-                        String created_at = user
-                                .getString("created_at");
-
-                        // Inserting row in users table
-                        db.addUser(name, email, uid, created_at);
-
-                        // Launch main activity
-                        Intent intent = new Intent(LoginActivity.this,
-                                MainMenu.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                    else
-                    {
-                        // Error in login. Get the error message
-                        String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(getApplicationContext(),
-                                errorMsg, Toast.LENGTH_LONG).show();
-                    }
-                }
-                catch (JSONException e)
-                {
-                    // JSON error
-                    e.printStackTrace();
-                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-
+                valid = true;
+            }
+            else
+            {
+                valid = false;
             }
         }
-        , new Response.ErrorListener()
-        {
 
-            @Override
-            public void onErrorResponse(VolleyError error)
-            {
-                Log.e(TAG, "Login Error: " + error.getMessage());
-                Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
-                hideDialog();
-            }
-        })
-        {
-            @Override
-            protected Map<String, String> getParams()
-            {
-                // Posting parameters to login url
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("email", email);
-                params.put("password", password);
-
-                return params;
-            }
-        };
-
-        // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+        return valid;
     }
 
     private void showDialog()
