@@ -125,39 +125,70 @@ public class SignupActivity extends Activity
         showDialog();
 
         /*----------------------------------------------------------------------------------------*
-         *  If the email passed is already associated with an account                             *
+         *  If the email passed is not already associated with an account                         *
          *----------------------------------------------------------------------------------------*/
         if (!db.emailExists(email))
         {
-            db.addUser(name, email, password);
-            Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
+            // Remove the processing indicator
             hideDialog();
+
+            // Add that user to the database
+            db.addUser(name, email, password);
+
+            // Send the app to the login page
+            routeToLoginPage();
         }
+
+        /*----------------------------------------------------------------------------------------*
+         *  If the email passed is already associated with an account                             *
+         *----------------------------------------------------------------------------------------*/
         else
         {
+            // Notify the user
             Toast.makeText(getApplicationContext(), "Email already associated with a user.", Toast.LENGTH_LONG).show();
+
+            // Remove the processing indicator
             hideDialog();
         }
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  Validate                                                                                  *
+     *--------------------------------------------------------------------------------------------*
+     *  Validates that the name email and password are in the correct format                      *
+     *--------------------------------------------------------------------------------------------*/
     public boolean validate(String name, String email, String password)
     {
+        // Initialize a boolean representing the validity of the parameters passed
         boolean valid;
 
+        /*----------------------------------------------------------------------------------------*
+         *  If the name is empty, the email does not look like an email, or the pass is empty     *
+         *----------------------------------------------------------------------------------------*/
         if (name.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() || password.isEmpty())
         {
+            // Set valid to  false
             valid = false;
         }
+
+        /*----------------------------------------------------------------------------------------*
+         *  Else if the name and pass is not empty, and the email looks like an email             *
+         *----------------------------------------------------------------------------------------*/
         else
         {
-            valid = name.length() > 5 || password.length() > 5;
+            // Set valid to true
+            valid = true;
         }
 
+        // Return the validity of the parameters
         return valid;
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  RouteToLoginPage                                                                          *
+     *--------------------------------------------------------------------------------------------*
+     *  Sends app to login page                                                                   *
+     *--------------------------------------------------------------------------------------------*/
     public void routeToLoginPage()
     {
         Intent i = new Intent(getApplicationContext(),
@@ -166,13 +197,22 @@ public class SignupActivity extends Activity
         finish();
     }
 
-
+    /*--------------------------------------------------------------------------------------------*
+     *  ShowDialog                                                                                *
+     *--------------------------------------------------------------------------------------------*
+     *  Shows the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
     private void showDialog()
     {
         if (!pDialog.isShowing())
             pDialog.show();
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  HideDialog                                                                                *
+     *--------------------------------------------------------------------------------------------*
+     *  Hides the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
     private void hideDialog()
     {
         if (pDialog.isShowing())

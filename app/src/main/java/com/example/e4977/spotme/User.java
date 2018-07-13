@@ -8,13 +8,23 @@ import java.util.Date;
 
 public class User
 {
+    /*--------------------------------------------------------------------------------------------*
+     *  Constants                                                                                 *
+     *--------------------------------------------------------------------------------------------*/
     private static final String TAG = User.class.getSimpleName();
+
+    /*--------------------------------------------------------------------------------------------*
+     *  Class variables                                                                           *
+     *--------------------------------------------------------------------------------------------*/
     public String id;
     public String userName;
     public String email;
     public String password;
     public String date;
 
+    /*--------------------------------------------------------------------------------------------*
+     *  Constructor                                                                               *
+     *--------------------------------------------------------------------------------------------*/
     public User(String id, String userName, String email, String password)
     {
         this.id = id;
