@@ -15,22 +15,24 @@ public class User
     public String password;
     public String date;
 
-    public User(String id, String userName, String email, String password) {
+    public User(String id, String userName, String email, String password)
+    {
         this.id = id;
         this.userName = userName;
         this.email = email;
         this.password = password;
 
-        try {
+        try
+        {
             Date today = Calendar.getInstance().getTime();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String dateString = simpleDateFormat.format(today);
             this.date = dateString;
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Log.e(TAG, "Error", e);
             return;
         }
     }
-
 }

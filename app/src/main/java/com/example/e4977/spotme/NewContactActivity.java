@@ -11,69 +11,116 @@ import android.widget.Toast;
 public class NewContactActivity
         extends AppCompatActivity
 {
-
+    /*--------------------------------------------------------------------------------------------*
+     *  Member variables                                                                          *
+     *--------------------------------------------------------------------------------------------*/
     Button addContactButton;
     EditText nameField;
     EditText emailAddressField;
     EditText phoneNumberField;
     SQLiteHandler db;
 
+    /*--------------------------------------------------------------------------------------------*
+     *  onCreate                                                                                  *
+     *--------------------------------------------------------------------------------------------*/
     @Override
-    protected void onCreate (Bundle savedInstanceState)
+    protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_contact_view);
 
+        // Initializes the SQLite database
         db = new SQLiteHandler(this);
 
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Views                                                                      *
+         *----------------------------------------------------------------------------------------*/
         nameField = findViewById(R.id.nameField);
         emailAddressField = findViewById(R.id.emailAddressField);
         phoneNumberField = findViewById(R.id.phoneNumberField);
-
         addContactButton = findViewById(R.id.addContactButton);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Set addContact Button on click listener                                               *
+         *----------------------------------------------------------------------------------------*/
         addContactButton.setOnClickListener(new View.OnClickListener()
         {
+
+            /*------------------------------------------------------------------------------------*
+             *  OnClick                                                                           *
+             *------------------------------------------------------------------------------------*/
             @Override
-            public void onClick (View v)
+            public void onClick(View v)
             {
+                // Get the name email and phone input by the user
                 String name = nameField.getText().toString();
                 String emailAddress = emailAddressField.getText().toString();
                 String phoneNumber = phoneNumberField.getText().toString();
-                if(validate(name, emailAddress, phoneNumber))
+
+                /*--------------------------------------------------------------------------------*
+                 *  if the name phone and email are valid                                         *
+                 *--------------------------------------------------------------------------------*/
+                if (validate(name, emailAddress, phoneNumber))
                 {
+                    // Add the new contact to the database
                     db.addContact(name, emailAddress, phoneNumber);
-                    Intent intent = new Intent(getApplicationContext(), ContactActivity.class);
-                    startActivity(intent);
+
+                    // Send the app to the contact activity
+                    routeToContactPage();
                 }
+
+                /*--------------------------------------------------------------------------------*
+                 *  Else if the name phone and email are not valid                                *
+                 *--------------------------------------------------------------------------------*/
                 else
                 {
+                    // Notify the user
                     Toast.makeText(getApplicationContext(), "Contact details not full, please try again", Toast.LENGTH_LONG).show();
                 }
             }
         });
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  Validate                                                                                  *
+     *--------------------------------------------------------------------------------------------*
+     *  Checks for the email and password passed to make sure they are valid inputs               *
+     *--------------------------------------------------------------------------------------------*/
     private boolean validate(String name, String email, String phone)
     {
+        // Initialize a boolean to represent the validity of the name email and phone passed
         boolean valid;
 
+        /*----------------------------------------------------------------------------------------*
+         *  If the name is empty, the email looks like and email, or the phone is empty           *
+         *----------------------------------------------------------------------------------------*/
         if (name.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() || phone.isEmpty())
         {
+            // Set valid to false
             valid = false;
         }
+
+        /*----------------------------------------------------------------------------------------*
+         *  Else if the name and phone are not empty and the email looks like an email            *
+         *----------------------------------------------------------------------------------------*/
         else
         {
-            if (phone.length() != 7 || phone.length() != 10)
-            {
-                valid = true;
-            }
-            else
-            {
-                valid = false;
-            }
+            // Set valid to true if phone is 7 or 10 long and false if not
+            valid = phone.length() != 7 || phone.length() != 10;
         }
 
+        // Return validity of the name email and phone
         return valid;
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  RouteToContactPage                                                                        *
+     *--------------------------------------------------------------------------------------------*
+     *  Sends app to contact page                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    public void routeToContactPage()
+    {
+        Intent intent = new Intent(getApplicationContext(), ContactActivity.class);
+        startActivity(intent);
+    }
 }

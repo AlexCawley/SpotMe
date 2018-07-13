@@ -86,7 +86,7 @@ public class SQLiteHandler extends SQLiteOpenHelper
         ArrayList<Contact> contacts = new ArrayList<Contact>();
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + ContactDBContract.Contact.TABLE_NAME, null);
-        if(cursor.moveToFirst())
+        if (cursor.moveToFirst())
         {
             do
             {
@@ -95,7 +95,8 @@ public class SQLiteHandler extends SQLiteOpenHelper
                 String phone = cursor.getString(3);
                 Contact contact = new Contact(name, email, phone);
                 contacts.add(contact);
-            } while (cursor.moveToNext());
+            }
+            while (cursor.moveToNext());
         }
         return contacts;
     }
@@ -105,18 +106,18 @@ public class SQLiteHandler extends SQLiteOpenHelper
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection =
-        {
-            UserDBContract.User._ID,
-            UserDBContract.User.COLUMN_NAME,
-            UserDBContract.User.COLUMN_EMAIL,
-            UserDBContract.User.COLUMN_PASSWORD
-        };
+                {
+                        UserDBContract.User._ID,
+                        UserDBContract.User.COLUMN_NAME,
+                        UserDBContract.User.COLUMN_EMAIL,
+                        UserDBContract.User.COLUMN_PASSWORD
+                };
 
         String selection = UserDBContract.User.COLUMN_EMAIL + " = ?";
         String[] selectionArgs =
-        {
-                userToFind.email
-        };
+                {
+                        userToFind.email
+                };
 
         Cursor cursor = db.query(UserDBContract.User.TABLE_NAME,
                                  projection,
@@ -131,7 +132,7 @@ public class SQLiteHandler extends SQLiteOpenHelper
             cursor.moveToFirst();
 
             User userTocheck = new User(cursor.getString(0), cursor.getString(1),
-                                  cursor.getString(2), cursor.getString(3));
+                                        cursor.getString(2), cursor.getString(3));
 
             if (userToFind.password.equalsIgnoreCase(userTocheck.password))
             {
@@ -145,7 +146,8 @@ public class SQLiteHandler extends SQLiteOpenHelper
         return null;
     }
 
-    public boolean emailExists(String email) {
+    public boolean emailExists(String email)
+    {
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] projection =
@@ -199,13 +201,15 @@ public class SQLiteHandler extends SQLiteOpenHelper
 
     private String getCurrentTimeString()
     {
-        try {
+        try
+        {
             Date today = Calendar.getInstance().getTime();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String dateString = simpleDateFormat.format(today);
             return dateString;
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             Log.e(TAG, "Error", e);
             return "00/00/0000";
         }
@@ -226,5 +230,4 @@ public class SQLiteHandler extends SQLiteOpenHelper
         }
         return false;
     }
-
 }
