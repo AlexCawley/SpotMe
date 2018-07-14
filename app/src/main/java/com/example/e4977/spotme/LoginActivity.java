@@ -1,13 +1,11 @@
 package com.example.e4977.spotme;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.view.View;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -39,6 +37,7 @@ public class LoginActivity extends Activity
     private EditText inputPassword;
     private ProgressDialog pDialog;
     private SQLiteHandler db;
+    private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
      *  OnCreate                                                                                  *
@@ -67,6 +66,20 @@ public class LoginActivity extends Activity
          *  Initialize SQLite DB                                                                  *
          *----------------------------------------------------------------------------------------*/
         db = new SQLiteHandler(getApplicationContext());
+
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Session                                                                    *
+         *----------------------------------------------------------------------------------------*/
+        sessionManager = new SessionManager(getApplicationContext());
+
+        /*----------------------------------------------------------------------------------------*
+         *  If the user is already logged in                                                      *
+         *----------------------------------------------------------------------------------------*/
+        if (sessionManager.isLoggedIn())
+        {
+            // Take the app to the main menu
+            routeToMainMenu();
+        }
 
         /*----------------------------------------------------------------------------------------*
          *  Set login button on click listener                                                    *
@@ -131,36 +144,119 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void checkLogin(final String email, final String password)
     {
+        // String used to cancel request if necessary
+        String tag_string_req = "req_login";
+
         // Indicate the login process has started
         pDialog.setMessage("Logging in ...");
         showDialog();
 
-        // Checks the database for a user with the same email and password
-        User currentUser = db.authenticateUser(new User(null, null, email, password));
-
-        /*----------------------------------------------------------------------------------------*
-         *  If a user with the same credentials is found                                          *
-         *----------------------------------------------------------------------------------------*/
-        if (currentUser != null)
+        // Create the new string request
+        StringRequest stringRequest = new StringRequest(Method.POST, AppConfig.URL_LOGIN, new Response.Listener<String>()
         {
-            // Remove loading indicator
-            hideDialog();
 
-            // Move the app to the main menu
-            routeToMainMenu();
-        }
+            /*------------------------------------------------------------------------------------*
+             *  onResponse                                                                        *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onResponse(String response)
+            {
+                // Log the JSON that was returned
+                Log.d(TAG, "Login Response: " + response.toString());
 
-        /*----------------------------------------------------------------------------------------*
-         *  Else if a user with the same credentials was not found                                *
-         *----------------------------------------------------------------------------------------*/
-        else
+                // Remove the processing view
+                hideDialog();
+
+                // Try to retrieve JSON and parse through it
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+
+                    // Check for errors in the JSON passed back
+                    boolean error = jObj.getBoolean("error");
+
+                    /*----------------------------------------------------------------------------*
+                     *  If there was no error found                                               *
+                     *----------------------------------------------------------------------------*/
+                    if (!error)
+                    {
+                        // Set login to true
+                        sessionManager.setLogin(true);
+
+                        // Parse through the JSON data
+                        String uid = jObj.getString("uid");
+                        JSONObject user = jObj.getJSONObject("user");
+                        String name = user.getString("name");
+                        String email = user.getString("email");
+                        String created_at = user.getString("created_at");
+
+                        // Add the new user data to the SQLite db
+                        db.addUser(name, email, uid, created_at);
+
+                        // Take the app to the main menu
+                        routeToMainMenu();
+                    }
+
+                    /*----------------------------------------------------------------------------*
+                     *  Else if there was an error found                                          *
+                     *----------------------------------------------------------------------------*/
+                    else
+                    {
+                        // Notify the user
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                       errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                /*--------------------------------------------------------------------------------*
+                 * Catch any error in retrieving parsing etc JSON                                 *
+                 *--------------------------------------------------------------------------------*/
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Login Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+            }
+        }, new Response.ErrorListener()
         {
-            // Remove loading indicator
-            hideDialog();
 
-            // Alert the user to try again
-            Toast.makeText(getApplicationContext(), "Username and password don't match, please try again.", Toast.LENGTH_LONG).show();
-        }
+            /*------------------------------------------------------------------------------------*
+             *  onErrorResponse                                                                   *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                // Notify the user
+                Log.e(TAG, "Login Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                               error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+
+        })
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  getParams                                                                         *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            protected Map<String, String> getParams()
+            {
+                // create a new params object and add the user data
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("email", email);
+                params.put("password", password);
+
+                // Return the user data
+                return params;
+            }
+
+        };
+
+        // Send the request string to the request queue to be sent to the PHP API
+        AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -206,6 +302,14 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public void routeToMainMenu()
     {
+        /*----------------------------------------------------------------------------------------*
+         *  If the user is logged in                                                              *
+         *----------------------------------------------------------------------------------------*/
+        if (sessionManager.isLoggedIn())
+        {
+            // Log them out
+            sessionManager.setLogin(false);
+        }
         Intent intent = new Intent(getApplicationContext(), MainMenu.class);
         startActivity(intent);
         finish();
@@ -236,7 +340,9 @@ public class LoginActivity extends Activity
     private void showDialog()
     {
         if (!pDialog.isShowing())
+        {
             pDialog.show();
+        }
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -249,6 +355,8 @@ public class LoginActivity extends Activity
     private void hideDialog()
     {
         if (pDialog.isShowing())
+        {
             pDialog.dismiss();
+        }
     }
 }

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,9 +14,9 @@ import java.util.Date;
 
 public class SQLiteHandler extends SQLiteOpenHelper
 {
-    /*----------------------------------------------------------------------------------------*
-     *  Constants                                                                             *
-     *----------------------------------------------------------------------------------------*/
+    /*--------------------------------------------------------------------------------------------*
+     *  Constants                                                                                 *
+     *--------------------------------------------------------------------------------------------*/
     private static final String TAG = SQLiteHandler.class.getSimpleName();
     private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "SpotMe";
@@ -26,6 +27,43 @@ public class SQLiteHandler extends SQLiteOpenHelper
     public SQLiteHandler(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  DoesTableExist                                                                            *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Checks the given database for the given table name                                        *
+     *--------------------------------------------------------------------------------------------*/
+    public static boolean doesTableExist(SQLiteDatabase db, String tableName)
+    {
+        // query for the database
+        Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
+
+        /*----------------------------------------------------------------------------------------*
+         *  If the cursor is not null                                                             *
+         *----------------------------------------------------------------------------------------*/
+        if (cursor != null)
+        {
+            /*------------------------------------------------------------------------------------*
+             *  If the cursor has at least one entry                                              *
+             *------------------------------------------------------------------------------------*/
+            if (cursor.getCount() > 0)
+            {
+                // Close the cursor
+                cursor.close();
+
+                // Return true because the table was found
+                return true;
+            }
+
+            // Close the cursor
+            cursor.close();
+        }
+
+        // Return false because the table was not found
+        return false;
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -72,7 +110,7 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*
      *  Adds a user to the database                                                               *
      *--------------------------------------------------------------------------------------------*/
-    public void addUser(String name, String email, String password)
+    public void addUser(String name, String email, String uid, String created_at)
     {
         // Get a writable version of the database
         SQLiteDatabase db = this.getWritableDatabase();
@@ -83,11 +121,14 @@ public class SQLiteHandler extends SQLiteOpenHelper
         // Add the name email password and date to the values
         values.put(UserDBContract.User.COLUMN_NAME, name);
         values.put(UserDBContract.User.COLUMN_EMAIL, email);
-        values.put(UserDBContract.User.COLUMN_PASSWORD, password);
-        values.put(UserDBContract.User.COLUMN_CREATED_AT, getCurrentTimeString());
+        values.put(UserDBContract.User.COLUMN_UID, uid);
+        values.put(UserDBContract.User.COLUMN_CREATED_AT, created_at);
 
         // Insert the user into the database
         long id = db.insert(UserDBContract.User.TABLE_NAME, null, values);
+
+        // Close te db
+        db.close();
 
         Log.d(TAG, "New user inserted into sqlite: " + id);
     }
@@ -357,42 +398,5 @@ public class SQLiteHandler extends SQLiteOpenHelper
             Log.e(TAG, "Error", e);
             return "00/00/0000";
         }
-    }
-
-    /*--------------------------------------------------------------------------------------------*
-     *                                                                                            *
-     *  DoesTableExist                                                                            *
-     *                                                                                            *
-     *--------------------------------------------------------------------------------------------*
-     *  Checks the given database for the given table name                                        *
-     *--------------------------------------------------------------------------------------------*/
-    public static boolean doesTableExist(SQLiteDatabase db, String tableName)
-    {
-        // query for the database
-        Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
-
-        /*----------------------------------------------------------------------------------------*
-         *  If the cursor is not null                                                             *
-         *----------------------------------------------------------------------------------------*/
-        if (cursor != null)
-        {
-            /*------------------------------------------------------------------------------------*
-             *  If the cursor has at least one entry                                              *
-             *------------------------------------------------------------------------------------*/
-            if (cursor.getCount() > 0)
-            {
-                // Close the cursor
-                cursor.close();
-
-                // Return true because the table was found
-                return true;
-            }
-
-            // Close the cursor
-            cursor.close();
-        }
-
-        // Return false because the table was not found
-        return false;
     }
 }

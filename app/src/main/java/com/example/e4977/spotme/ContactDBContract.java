@@ -23,6 +23,7 @@ public final class ContactDBContract
                                              + COLUMN_EMAIL + " TEXT, "
                                              + COLUMN_PHONE + " TEXT, "
                                              + COLUMN_CREATED_AT + " INTEGER)";
+
         static String DELETE_CONTACT_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
     }
 }

@@ -4,10 +4,22 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SignupActivity extends Activity
 {
@@ -26,6 +38,7 @@ public class SignupActivity extends Activity
     private EditText inputPassword;
     private ProgressDialog pDialog;
     private SQLiteHandler db;
+    private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
@@ -55,6 +68,20 @@ public class SignupActivity extends Activity
          *  Initialize SQLite DB                                                                  *
          *----------------------------------------------------------------------------------------*/
         db = new SQLiteHandler(this);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Session manager                                                            *
+         *----------------------------------------------------------------------------------------*/
+        sessionManager = new SessionManager(getApplicationContext());
+
+        /*----------------------------------------------------------------------------------------*
+         *  If the user is already logged in                                                      *
+         *----------------------------------------------------------------------------------------*/
+        if (sessionManager.isLoggedIn())
+        {
+            // Take the app to the main menu
+            routeToMainMenu();
+        }
 
         /*----------------------------------------------------------------------------------------*
          *  Set register button on click listener                                                 *
@@ -120,38 +147,124 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*
      *  Creates a new uer with the passed info and adds them to the db                            *
      *--------------------------------------------------------------------------------------------*/
-    private void registerUser(String name, String email, String password)
+    private void registerUser(final String name, final String email, final String password)
     {
-        // Show the loading indicator
+        // String used to cancel request if needed
+        String tag_string_req = "req_register";
+
+        // Show the loading message
         pDialog.setMessage("Registering ...");
         showDialog();
 
-        /*----------------------------------------------------------------------------------------*
-         *  If the email passed is not already associated with an account                         *
-         *----------------------------------------------------------------------------------------*/
-        if (!db.emailExists(email))
+        // Create the new string request
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                                                 AppConfig.URL_REGISTER, new Response.Listener<String>()
         {
-            // Remove the processing indicator
-            hideDialog();
 
-            // Add that user to the database
-            db.addUser(name, email, password);
+            /*------------------------------------------------------------------------------------*
+             *  onResponse                                                                        *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onResponse(String response)
+            {
+                // Log the json that was returned
+                Log.d(TAG, "Register Response: " + response.toString());
 
-            // Send the app to the login page
-            routeToLoginPage();
-        }
+                // Hide the loading view
+                hideDialog();
 
-        /*----------------------------------------------------------------------------------------*
-         *  If the email passed is already associated with an account                             *
-         *----------------------------------------------------------------------------------------*/
-        else
+                // Try to get the json response
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+
+                    // Check for an error in the response
+                    boolean error = jObj.getBoolean("error");
+
+                    /*----------------------------------------------------------------------------*
+                     *  If no error was found                                                     *
+                     *----------------------------------------------------------------------------*/
+                    if (!error)
+                    {
+                        // Parse through the JSON
+                        String uid = jObj.getString("uid");
+                        JSONObject user = jObj.getJSONObject("user");
+                        String name = user.getString("name");
+                        String email = user.getString("email");
+                        String created_at = user
+                                .getString("created_at");
+
+                        // Add the user to the db
+                        db.addUser(name, email, uid, created_at);
+
+                        // Indicate the success to the user
+                        Toast.makeText(getApplicationContext(), "User successfully registered.", Toast.LENGTH_LONG).show();
+
+                        // Take the user back to the login screen
+                        routeToLoginPage();
+                    }
+
+                    /*----------------------------------------------------------------------------*
+                     *  Else if an error was found                                                *
+                     *----------------------------------------------------------------------------*/
+                    else
+                    {
+                        // Notify the user
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                       errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                /*----------------------------------------------------------------------------*
+                 * Catch any error in retrieving parsing etc JSON                             *
+                 *----------------------------------------------------------------------------*/
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener()
         {
-            // Notify the user
-            Toast.makeText(getApplicationContext(), "Email already associated with a user.", Toast.LENGTH_LONG).show();
 
-            // Remove the processing indicator
-            hideDialog();
-        }
+            /*------------------------------------------------------------------------------------*
+             *  onErrorResponse                                                                   *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                // Notify the user
+                Log.e(TAG, "Registration Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                               error.getMessage(), Toast.LENGTH_LONG).show();
+
+                // Hide the processing view
+                hideDialog();
+            }
+        })
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  getParams                                                                         *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            protected Map<String, String> getParams()
+            {
+                // add a new params object and add the new user data
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("name", name);
+                params.put("email", email);
+                params.put("password", password);
+
+                // Return the params created
+                return params;
+            }
+
+        };
+
+        // Add the request to the queue to be sent to the php api
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -200,6 +313,20 @@ public class SignupActivity extends Activity
         Intent i = new Intent(getApplicationContext(),
                               LoginActivity.class);
         startActivity(i);
+        finish();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  RouteToNewMainMenu                                                                        *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Sends app to main menu                                                                    *
+     *--------------------------------------------------------------------------------------------*/
+    public void routeToMainMenu()
+    {
+        Intent intent = new Intent(getApplicationContext(), MainMenu.class);
+        startActivity(intent);
         finish();
     }
 

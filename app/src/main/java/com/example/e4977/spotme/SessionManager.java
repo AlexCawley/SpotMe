@@ -7,23 +7,24 @@ import android.util.Log;
 
 public class SessionManager
 {
-    // LogCat tag
+    /*--------------------------------------------------------------------------------------------*
+     *  Constants                                                                                 *
+     *--------------------------------------------------------------------------------------------*/
     private static String TAG = SessionManager.class.getSimpleName();
-
-    // Shared Preferences
-    SharedPreferences pref;
-
-    Editor editor;
-    Context _context;
-
-    // Shared pref mode
-    int PRIVATE_MODE = 0;
-
-    // Shared preferences file name
     private static final String PREF_NAME = "SpotMeLogin";
-
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
 
+    /*--------------------------------------------------------------------------------------------*
+     *  Member variables                                                                          *
+     *--------------------------------------------------------------------------------------------*/
+    private SharedPreferences pref;
+    private Editor editor;
+    private Context _context;
+    private int PRIVATE_MODE = 0;
+
+    /*--------------------------------------------------------------------------------------------*
+     *  Constructor                                                                               *
+     *--------------------------------------------------------------------------------------------*/
     public SessionManager(Context context)
     {
         this._context = context;
@@ -31,11 +32,12 @@ public class SessionManager
         editor = pref.edit();
     }
 
+    /*--------------------------------------------------------------------------------------------*
+     *  Getters and setters                                                                       *
+     *--------------------------------------------------------------------------------------------*/
     public void setLogin(boolean isLoggedIn)
     {
         editor.putBoolean(KEY_IS_LOGGEDIN, isLoggedIn);
-
-        // commit changes
         editor.commit();
 
         Log.d(TAG, "User login session modified");
