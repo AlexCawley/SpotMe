@@ -26,6 +26,9 @@ public class NewContactActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_contact_view);
 
@@ -79,6 +82,9 @@ public class NewContactActivity
                 }
             }
         });
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -90,6 +96,9 @@ public class NewContactActivity
      *--------------------------------------------------------------------------------------------*/
     private boolean validate(String name, String email, String phone)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Initialize a boolean to represent the validity of the name email and phone passed
         boolean valid;
 
@@ -111,6 +120,9 @@ public class NewContactActivity
             valid = phone.length() != 7 || phone.length() != 10;
         }
 
+        // Log method exit
+        methodLogger.end();
+
         // Return validity of the name email and phone
         return valid;
     }
@@ -124,7 +136,13 @@ public class NewContactActivity
      *--------------------------------------------------------------------------------------------*/
     public void routeToContactPage()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(getApplicationContext(), ContactActivity.class);
         startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
     }
 }

@@ -24,11 +24,6 @@ import java.util.Map;
 public class SignupActivity extends Activity
 {
     /*--------------------------------------------------------------------------------------------*
-     *  Constants                                                                                 *
-     *--------------------------------------------------------------------------------------------*/
-    private static final String TAG = SignupActivity.class.getSimpleName();
-
-    /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
      *--------------------------------------------------------------------------------------------*/
     private Button btnRegister;
@@ -46,6 +41,9 @@ public class SignupActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
@@ -138,6 +136,8 @@ public class SignupActivity extends Activity
 
         });
 
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -149,6 +149,9 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void registerUser(final String name, final String email, final String password)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // String used to cancel request if needed
         String tag_string_req = "req_register";
 
@@ -167,8 +170,11 @@ public class SignupActivity extends Activity
             @Override
             public void onResponse(String response)
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // Log the json that was returned
-                Log.d(TAG, "Register Response: " + response.toString());
+                methodLogger.d("Register Response: " + response.toString());
 
                 // Hide the loading view
                 hideDialog();
@@ -224,6 +230,8 @@ public class SignupActivity extends Activity
                     e.printStackTrace();
                 }
 
+                // Log method exit
+                methodLogger.end();
             }
         }, new Response.ErrorListener()
         {
@@ -234,13 +242,19 @@ public class SignupActivity extends Activity
             @Override
             public void onErrorResponse(VolleyError error)
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // Notify the user
-                Log.e(TAG, "Registration Error: " + error.getMessage());
+                methodLogger.e("Registration Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                                error.getMessage(), Toast.LENGTH_LONG).show();
 
                 // Hide the processing view
                 hideDialog();
+
+                // Log method exit
+                methodLogger.end();
             }
         })
         {
@@ -251,11 +265,17 @@ public class SignupActivity extends Activity
             @Override
             protected Map<String, String> getParams()
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // add a new params object and add the new user data
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("name", name);
                 params.put("email", email);
                 params.put("password", password);
+
+                // Log method exit
+                methodLogger.end();
 
                 // Return the params created
                 return params;
@@ -265,6 +285,9 @@ public class SignupActivity extends Activity
 
         // Add the request to the queue to be sent to the php api
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -276,6 +299,9 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public boolean validate(String name, String email, String password)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Initialize a boolean representing the validity of the parameters passed
         boolean valid;
 
@@ -297,6 +323,9 @@ public class SignupActivity extends Activity
             valid = true;
         }
 
+        // Log method exit
+        methodLogger.end();
+
         // Return the validity of the parameters
         return valid;
     }
@@ -310,10 +339,15 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public void routeToLoginPage()
     {
-        Intent i = new Intent(getApplicationContext(),
-                              LoginActivity.class);
-        startActivity(i);
-        finish();
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        Intent intent = new Intent(getApplicationContext(),
+                                   LoginActivity.class);
+        startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -325,9 +359,14 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public void routeToMainMenu()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(getApplicationContext(), MainMenu.class);
         startActivity(intent);
-        finish();
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -339,8 +378,16 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void showDialog()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (!pDialog.isShowing())
+        {
             pDialog.show();
+        }
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -352,7 +399,15 @@ public class SignupActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void hideDialog()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (pDialog.isShowing())
+        {
             pDialog.dismiss();
+        }
+
+        // Log method exit
+        methodLogger.end();
     }
 }

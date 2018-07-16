@@ -3,6 +3,8 @@ package com.example.e4977.spotme;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,6 +19,7 @@ public class ContactActivity
     ArrayList<Contact> contacts;
     LinearLayout contactViewWrapper;
     SQLiteHandler db;
+    Button newContactButton;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -24,6 +27,9 @@ public class ContactActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_view);
 
@@ -31,6 +37,7 @@ public class ContactActivity
          *  Initialize Views                                                                      *
          *----------------------------------------------------------------------------------------*/
         contactViewWrapper = findViewById(R.id.contactViewWrapper);
+        newContactButton = findViewById(R.id.newContactButton);
 
         // Initializes the SQLite database
         db = new SQLiteHandler(this);
@@ -61,6 +68,26 @@ public class ContactActivity
                 displayContact(contacts.get(i));
             }
         }
+
+        /*----------------------------------------------------------------------------------------*
+         *  Set new contact button on click listener                                              *
+         *----------------------------------------------------------------------------------------*/
+        newContactButton.setOnClickListener(new View.OnClickListener()
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  OnClick                                                                           *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onClick(View v)
+            {
+                // Send the app to the new contact page
+                routeToNewContactPage();
+            }
+        });
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -75,6 +102,9 @@ public class ContactActivity
      *--------------------------------------------------------------------------------------------*/
     public boolean displayContact(Contact contact)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         /*----------------------------------------------------------------------------------------*
          *  Setup the layout params for the contact view                                          *
          *----------------------------------------------------------------------------------------*/
@@ -113,6 +143,9 @@ public class ContactActivity
          *----------------------------------------------------------------------------------------*/
         contactViewWrapper.addView(contactWrapper);
 
+        // Log method exit
+        methodLogger.end();
+
         // Return true to indicate that the contacts were successfully added
         return true;
     }
@@ -126,7 +159,13 @@ public class ContactActivity
      *--------------------------------------------------------------------------------------------*/
     public void routeToNewContactPage()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(this, NewContactActivity.class);
         startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
     }
 }

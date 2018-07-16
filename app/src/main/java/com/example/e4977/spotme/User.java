@@ -9,11 +9,6 @@ import java.util.Date;
 public class User
 {
     /*--------------------------------------------------------------------------------------------*
-     *  Constants                                                                                 *
-     *--------------------------------------------------------------------------------------------*/
-    private static final String TAG = User.class.getSimpleName();
-
-    /*--------------------------------------------------------------------------------------------*
      *  Class variables                                                                           *
      *--------------------------------------------------------------------------------------------*/
     public String id;
@@ -27,6 +22,9 @@ public class User
      *--------------------------------------------------------------------------------------------*/
     public User(String id, String userName, String email, String password)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         this.id = id;
         this.userName = userName;
         this.email = email;
@@ -41,8 +39,15 @@ public class User
         }
         catch (Exception e)
         {
-            Log.e(TAG, "Error", e);
+            methodLogger.e("Error: " + e);
+
+            // Log method exit
+            methodLogger.end();
+
             return;
         }
+
+        // Log method exit
+        methodLogger.end();
     }
 }

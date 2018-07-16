@@ -25,8 +25,14 @@ public class AppController extends Application
     @Override
     public void onCreate()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate();
         mInstance = this;
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -34,15 +40,27 @@ public class AppController extends Application
      *--------------------------------------------------------------------------------------------*/
     public static synchronized AppController getInstance()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        // Log method exit
+        methodLogger.end();
+
         return mInstance;
     }
 
     public RequestQueue getRequestQueue()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (mRequestQueue == null)
         {
             mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         }
+
+        // Log method exit
+        methodLogger.end();
 
         return mRequestQueue;
     }
@@ -56,8 +74,14 @@ public class AppController extends Application
      *--------------------------------------------------------------------------------------------*/
     public <T> void addToRequestQueue(Request<T> req, String tag)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
         getRequestQueue().add(req);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -69,8 +93,14 @@ public class AppController extends Application
      *--------------------------------------------------------------------------------------------*/
     public <T> void addToRequestQueue(Request<T> req)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         req.setTag(TAG);
         getRequestQueue().add(req);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -82,9 +112,15 @@ public class AppController extends Application
      *--------------------------------------------------------------------------------------------*/
     public void cancelPendingRequests(Object tag)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (mRequestQueue != null)
         {
             mRequestQueue.cancelAll(tag);
         }
+
+        // Log method exit
+        methodLogger.end();
     }
 }

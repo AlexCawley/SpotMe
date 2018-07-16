@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,11 +23,6 @@ import java.util.Map;
 public class LoginActivity extends Activity
 {
     /*--------------------------------------------------------------------------------------------*
-     *  Constants                                                                                 *
-     *--------------------------------------------------------------------------------------------*/
-    private static final String TAG = LoginActivity.class.getSimpleName();
-
-    /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
      *--------------------------------------------------------------------------------------------*/
     private Button btnLogin;
@@ -45,6 +39,9 @@ public class LoginActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -133,6 +130,9 @@ public class LoginActivity extends Activity
                 routeToSignupPage();
             }
         });
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -144,6 +144,9 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void checkLogin(final String email, final String password)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // String used to cancel request if necessary
         String tag_string_req = "req_login";
 
@@ -161,8 +164,11 @@ public class LoginActivity extends Activity
             @Override
             public void onResponse(String response)
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // Log the JSON that was returned
-                Log.d(TAG, "Login Response: " + response.toString());
+                methodLogger.d("Login Response: " + response.toString());
 
                 // Remove the processing view
                 hideDialog();
@@ -218,6 +224,9 @@ public class LoginActivity extends Activity
                     Toast.makeText(getApplicationContext(), "Login Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
 
+                // Log method exit
+                methodLogger.end();
+
             }
         }, new Response.ErrorListener()
         {
@@ -228,11 +237,17 @@ public class LoginActivity extends Activity
             @Override
             public void onErrorResponse(VolleyError error)
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // Notify the user
-                Log.e(TAG, "Login Error: " + error.getMessage());
+                methodLogger.e("Login Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                                error.getMessage(), Toast.LENGTH_LONG).show();
                 hideDialog();
+
+                // Log method exit
+                methodLogger.end();
             }
 
         })
@@ -244,10 +259,16 @@ public class LoginActivity extends Activity
             @Override
             protected Map<String, String> getParams()
             {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
                 // create a new params object and add the user data
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("email", email);
                 params.put("password", password);
+
+                // Log method exit
+                methodLogger.end();
 
                 // Return the user data
                 return params;
@@ -268,6 +289,9 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public boolean validate(String email, String password)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Initialize a boolean indicating whether the email and password passed are valid
         boolean valid;
 
@@ -289,6 +313,9 @@ public class LoginActivity extends Activity
             valid = password.length() > 5;
         }
 
+        // Log method exit
+        methodLogger.end();
+
         // Return the result
         return valid;
     }
@@ -302,17 +329,23 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public void routeToMainMenu()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         /*----------------------------------------------------------------------------------------*
-         *  If the user is logged in                                                              *
+         *  If the user is not logged in                                                          *
          *----------------------------------------------------------------------------------------*/
-        if (sessionManager.isLoggedIn())
+        if (!sessionManager.isLoggedIn())
         {
-            // Log them out
-            sessionManager.setLogin(false);
+            // Log them in
+            sessionManager.setLogin(true);
         }
+
         Intent intent = new Intent(getApplicationContext(), MainMenu.class);
         startActivity(intent);
-        finish();
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -324,10 +357,15 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     public void routeToSignupPage()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(getApplicationContext(),
                                    SignupActivity.class);
         startActivity(intent);
-        finish();
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -339,10 +377,16 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void showDialog()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (!pDialog.isShowing())
         {
             pDialog.show();
         }
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -354,9 +398,15 @@ public class LoginActivity extends Activity
      *--------------------------------------------------------------------------------------------*/
     private void hideDialog()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         if (pDialog.isShowing())
         {
             pDialog.dismiss();
         }
+
+        // Log method exit
+        methodLogger.end();
     }
 }

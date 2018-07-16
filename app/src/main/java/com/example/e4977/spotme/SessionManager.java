@@ -10,7 +10,6 @@ public class SessionManager
     /*--------------------------------------------------------------------------------------------*
      *  Constants                                                                                 *
      *--------------------------------------------------------------------------------------------*/
-    private static String TAG = SessionManager.class.getSimpleName();
     private static final String PREF_NAME = "SpotMeLogin";
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
 
@@ -27,9 +26,15 @@ public class SessionManager
      *--------------------------------------------------------------------------------------------*/
     public SessionManager(Context context)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         this._context = context;
         pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -37,10 +42,16 @@ public class SessionManager
      *--------------------------------------------------------------------------------------------*/
     public void setLogin(boolean isLoggedIn)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         editor.putBoolean(KEY_IS_LOGGEDIN, isLoggedIn);
         editor.commit();
 
-        Log.d(TAG, "User login session modified");
+        methodLogger.d("User login session modified");
+
+        // Log method exit
+        methodLogger.end();
     }
 
     public boolean isLoggedIn()

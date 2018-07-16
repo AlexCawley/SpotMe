@@ -1,8 +1,5 @@
 package com.example.e4977.spotme;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 public class Contact
 {
     /*--------------------------------------------------------------------------------------------*
@@ -19,9 +16,15 @@ public class Contact
                    String email,
                    String phone)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         this.name = name;
         this.email = email;
         this.phone = phone;
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*

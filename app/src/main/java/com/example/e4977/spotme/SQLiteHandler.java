@@ -17,7 +17,6 @@ public class SQLiteHandler extends SQLiteOpenHelper
     /*--------------------------------------------------------------------------------------------*
      *  Constants                                                                                 *
      *--------------------------------------------------------------------------------------------*/
-    private static final String TAG = SQLiteHandler.class.getSimpleName();
     private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "SpotMe";
 
@@ -27,6 +26,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
     public SQLiteHandler(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -38,6 +42,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public static boolean doesTableExist(SQLiteDatabase db, String tableName)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // query for the database
         Cursor cursor = db.rawQuery("select DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'", null);
 
@@ -62,6 +69,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
             cursor.close();
         }
 
+        // Log method exit
+        methodLogger.end();
+
         // Return false because the table was not found
         return false;
     }
@@ -72,11 +82,17 @@ public class SQLiteHandler extends SQLiteOpenHelper
     @Override
     public void onCreate(SQLiteDatabase db)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Create tables
         db.execSQL(UserDBContract.User.CREATE_USER_TABLE);
         db.execSQL(ContactDBContract.Contact.CREATE_CONTACT_TABLE);
 
-        Log.d(TAG, "Database tables created");
+        methodLogger.d("Database tables created");
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -85,12 +101,18 @@ public class SQLiteHandler extends SQLiteOpenHelper
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Drop tables
         db.execSQL(UserDBContract.User.DELETE_USER_TABLE);
         db.execSQL(ContactDBContract.Contact.DELETE_CONTACT_TABLE);
 
         // Create tables
         onCreate(db);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -99,8 +121,14 @@ public class SQLiteHandler extends SQLiteOpenHelper
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Drop, then create tables
         onUpgrade(db, oldVersion, newVersion);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -112,6 +140,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public void addUser(String name, String email, String uid, String created_at)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a writable version of the database
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -130,7 +161,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
         // Close te db
         db.close();
 
-        Log.d(TAG, "New user inserted into sqlite: " + id);
+        // Log the new user that was added
+        methodLogger.d("New user inserted into sqlite: " + id);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -142,6 +177,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public void addContact(String name, String email, String phone)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a writeable version of the databse
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -157,7 +195,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
         // Insert the new contact
         long id = db.insert(ContactDBContract.Contact.TABLE_NAME, null, values);
 
-        Log.d(TAG, "New contact inserted into sqlite: " + id);
+        // Log the new contact that was created
+        methodLogger.d("New contact inserted into sqlite: " + id);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -169,6 +211,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public ArrayList<Contact> getAllContacts()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a readable database
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -202,6 +247,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
             while (cursor.moveToNext());
         }
 
+        // Log method exit
+        methodLogger.end();
+
         // Return the array of contacts created
         return contacts;
     }
@@ -215,6 +263,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public User authenticateUser(User userToFind)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a readable database
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -260,14 +311,22 @@ public class SQLiteHandler extends SQLiteOpenHelper
              *------------------------------------------------------------------------------------*/
             if (userToFind.password.equalsIgnoreCase(userTocheck.password))
             {
-                Log.d(TAG, "Fetching user from Sqlite: " + userTocheck.toString());
+                // Log the user that was found
+                methodLogger.d("Fetching user from Sqlite: " + userTocheck.toString());
+
+                // Log method exit
+                methodLogger.end();
 
                 // Return the user found
                 return userTocheck;
             }
         }
 
-        Log.d(TAG, "User no found");
+        // Log that no user was found
+        methodLogger.d("User no found");
+
+        // Log method exit
+        methodLogger.end();
 
         // return null
         return null;
@@ -282,6 +341,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public boolean emailExists(String email)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a readable database
         SQLiteDatabase db = this.getReadableDatabase();
 
@@ -318,9 +380,15 @@ public class SQLiteHandler extends SQLiteOpenHelper
             // Move the cursor to the first entry
             cursor.moveToFirst();
 
+            // Log method exit
+            methodLogger.end();
+
             // return true because the email was found
             return true;
         }
+
+        // Log method exit
+        methodLogger.end();
 
         // Return false
         return false;
@@ -335,6 +403,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public void deleteUsers()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a writable database
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -342,7 +413,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
         db.delete(UserDBContract.User.TABLE_NAME, null, null);
         db.close();
 
-        Log.d(TAG, "Deleted all user info from sqlite");
+        // Log the deletion of users
+        methodLogger.d("Deleted all user info from sqlite");
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -354,6 +429,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     public void deleteContacts()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         // Get a writable database
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -361,7 +439,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
         db.delete(ContactDBContract.Contact.DELETE_CONTACT_TABLE, null, null);
         db.close();
 
-        Log.d(TAG, "Deleted all contact info from sqlite");
+        // Log the deletion of contacts
+        methodLogger.d("Deleted all contact info from sqlite");
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -373,6 +455,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
      *--------------------------------------------------------------------------------------------*/
     private String getCurrentTimeString()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         /*----------------------------------------------------------------------------------------*
          *  Try to get the date                                                                   *
          *----------------------------------------------------------------------------------------*/
@@ -385,6 +470,9 @@ public class SQLiteHandler extends SQLiteOpenHelper
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String dateString = simpleDateFormat.format(today);
 
+            // Log method exit
+            methodLogger.end();
+
             // Return the date found
             return dateString;
         }
@@ -395,7 +483,11 @@ public class SQLiteHandler extends SQLiteOpenHelper
         catch (Exception e)
         {
             // Return a new date set to be 00/00/0000
-            Log.e(TAG, "Error", e);
+            methodLogger.e("Error: " +  e);
+
+            // Log method exit
+            methodLogger.end();
+
             return "00/00/0000";
         }
     }

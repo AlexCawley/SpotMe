@@ -9,4 +9,7 @@ public class AppConfig
     // Server user register url
     public static String URL_REGISTER = "http://192.168.0.23/android_login_api/register.php";
 
+    // Determines if method entries and exits should be logged
+    public static Boolean DEUBUG_MODE = true;
+
 }

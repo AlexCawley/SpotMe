@@ -22,6 +22,9 @@ public class MainMenu
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
@@ -67,6 +70,9 @@ public class MainMenu
                 routeToContactPage();
             }
         });
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -78,8 +84,14 @@ public class MainMenu
      *--------------------------------------------------------------------------------------------*/
     public void routeToContactPage()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(this, ContactActivity.class);
         startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
     }
 
     /*--------------------------------------------------------------------------------------------*
@@ -91,8 +103,13 @@ public class MainMenu
      *--------------------------------------------------------------------------------------------*/
     private void logoutUser()
     {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
         Intent intent = new Intent(MainMenu.this, LoginActivity.class);
         startActivity(intent);
-        finish();
+
+        // Log method exit
+        methodLogger.end();
     }
 }
