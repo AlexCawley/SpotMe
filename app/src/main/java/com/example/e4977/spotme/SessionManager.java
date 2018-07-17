@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
+import java.util.HashMap;
+
 public class SessionManager
 {
     /*--------------------------------------------------------------------------------------------*
@@ -20,6 +22,7 @@ public class SessionManager
     private Editor editor;
     private Context _context;
     private int PRIVATE_MODE = 0;
+    private static User user;
 
     /*--------------------------------------------------------------------------------------------*
      *  Constructor                                                                               *
@@ -32,6 +35,17 @@ public class SessionManager
         this._context = context;
         pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
+
+        /*----------------------------------------------------------------------------------------*
+         *  If the user is logged in                                                              *
+         *----------------------------------------------------------------------------------------*/
+        if (isLoggedIn())
+        {
+            // Set the user field that can be accessed throughout the app
+            SQLiteHandler db = new SQLiteHandler(context);
+            HashMap<String, String> userMap = db.getUserDetails();
+            user = new User(userMap.get("uid"), userMap.get("name"), userMap.get("email"), null);
+        }
 
         // Log method exit
         methodLogger.end();
@@ -52,6 +66,11 @@ public class SessionManager
 
         // Log method exit
         methodLogger.end();
+    }
+
+    public static User getUser()
+    {
+        return user;
     }
 
     public boolean isLoggedIn()

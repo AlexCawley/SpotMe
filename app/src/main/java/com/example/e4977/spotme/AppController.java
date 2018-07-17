@@ -18,6 +18,7 @@ public class AppController extends Application
      *--------------------------------------------------------------------------------------------*/
     private RequestQueue mRequestQueue;
     private static AppController mInstance;
+    private static  User user;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *

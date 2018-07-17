@@ -1,5 +1,7 @@
 package com.example.e4977.spotme;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,17 +10,30 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class NewContactActivity
         extends AppCompatActivity
 {
     /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
      *--------------------------------------------------------------------------------------------*/
-    Button addContactButton;
-    EditText nameField;
-    EditText emailAddressField;
-    EditText phoneNumberField;
-    SQLiteHandler db;
+    private Button addContactButton;
+    private EditText nameField;
+    private EditText emailAddressField;
+    private EditText phoneNumberField;
+    private SQLiteHandler db;
+    private ProgressDialog pDialog;
+    private Context mContext;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -36,12 +51,13 @@ public class NewContactActivity
         db = new SQLiteHandler(this);
 
         /*----------------------------------------------------------------------------------------*
-         *  Initialize Views                                                                      *
+         *  Initialize Views and context                                                          *
          *----------------------------------------------------------------------------------------*/
         nameField = findViewById(R.id.nameField);
         emailAddressField = findViewById(R.id.emailAddressField);
         phoneNumberField = findViewById(R.id.phoneNumberField);
         addContactButton = findViewById(R.id.addContactButton);
+        mContext = this;
 
         /*----------------------------------------------------------------------------------------*
          *  Set addContact Button on click listener                                               *
@@ -56,8 +72,8 @@ public class NewContactActivity
             public void onClick(View v)
             {
                 // Get the name email and phone input by the user
-                String name = nameField.getText().toString();
-                String emailAddress = emailAddressField.getText().toString();
+                final String name = nameField.getText().toString();
+                final String emailAddress = emailAddressField.getText().toString();
                 String phoneNumber = phoneNumberField.getText().toString();
 
                 /*--------------------------------------------------------------------------------*
@@ -65,8 +81,135 @@ public class NewContactActivity
                  *--------------------------------------------------------------------------------*/
                 if (validate(name, emailAddress, phoneNumber))
                 {
-                    // Add the new contact to the database
-                    db.addContact(name, emailAddress, phoneNumber);
+                    /*----------------------------------------------------------------------------*
+                     *  initialize progressDialog                                                 *
+                     *----------------------------------------------------------------------------*/
+                    pDialog = new ProgressDialog(mContext);
+                    pDialog.setCancelable(false);
+
+                    // String used to cancel request if necessary
+                    String tag_string_req = "req_new_contact";
+
+                    // Indicate the login process has started
+                    pDialog.setMessage("Adding contact ...");
+                    showDialog();
+
+                    // Create the new string request
+                    StringRequest stringRequest = new StringRequest(Request.Method.POST, AppConfig.URL_NEW_CONTACT, new Response.Listener<String>()
+                    {
+
+                        /*------------------------------------------------------------------------*
+                         *  onResponse                                                            *
+                         *------------------------------------------------------------------------*/
+                        @Override
+                        public void onResponse(String response)
+                        {
+                            // Log method entry
+                            MethodLogger methodLogger = new MethodLogger();
+
+                            // Log the JSON that was returned
+                            methodLogger.d("New Contact Response: " + response.toString());
+
+                            // Remove the processing view
+                            hideDialog();
+
+                            // Try to retrieve JSON and parse through it
+                            try
+                            {
+                                JSONObject jObj = new JSONObject(response);
+
+                                // Check for errors in the JSON passed back
+                                boolean error = jObj.getBoolean("error");
+
+                                /*----------------------------------------------------------------*
+                                 *  If there was no error found                                   *
+                                 *----------------------------------------------------------------*/
+                                if (!error)
+                                {
+                                    // Indicate the success to the user
+                                    Toast.makeText(getApplicationContext(), "Contact successfully created.", Toast.LENGTH_LONG).show();
+
+                                    // Take the user back to the contact page
+                                    routeToContactPage();
+                                }
+
+                                /*----------------------------------------------------------------*
+                                 *  Else if there was an error found                              *
+                                 *----------------------------------------------------------------*/
+                                else
+                                {
+                                    // Notify the user
+                                    String errorMsg = jObj.getString("error_msg");
+                                    Toast.makeText(getApplicationContext(),
+                                                   errorMsg, Toast.LENGTH_LONG).show();
+                                }
+                            }
+
+                            /*--------------------------------------------------------------------*
+                             * Catch any error in retrieving parsing etc JSON                     *
+                             *--------------------------------------------------------------------*/
+                            catch (JSONException e)
+                            {
+                                e.printStackTrace();
+                                Toast.makeText(getApplicationContext(), "Error storing contact: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+
+                            // Log method exit
+                            methodLogger.end();
+
+                        }
+                    }, new Response.ErrorListener()
+                    {
+
+                        /*------------------------------------------------------------------------*
+                         *  onErrorResponse                                                       *
+                         *------------------------------------------------------------------------*/
+                        @Override
+                        public void onErrorResponse(VolleyError error)
+                        {
+                            // Log method entry
+                            MethodLogger methodLogger = new MethodLogger();
+
+                            // Notify the user
+                            methodLogger.e("Error storing contact: " + error.getMessage());
+                            Toast.makeText(getApplicationContext(),
+                                           error.getMessage(), Toast.LENGTH_LONG).show();
+                            hideDialog();
+
+                            // Log method exit
+                            methodLogger.end();
+                        }
+
+                    })
+                    {
+
+                        /*------------------------------------------------------------------------*
+                         *  getParams                                                             *
+                         *------------------------------------------------------------------------*/
+                        @Override
+                        protected Map<String, String> getParams()
+                        {
+                            // Log method entry
+                            MethodLogger methodLogger = new MethodLogger();
+
+                            // create a new params object and add the contact data
+                            Map<String, String> params = new HashMap<String, String>();
+
+                            params.put("user_id", SessionManager.getUser().getId());
+                            params.put("name", name);
+                            if (emailAddress != "")
+                            {
+                                params.put("email", emailAddress);
+                            }
+
+                            // Log method exit
+                            methodLogger.end();
+
+                            // Return the user data
+                            return params;
+                        }
+
+                    };
 
                     // Send the app to the contact activity
                     routeToContactPage();
@@ -141,6 +284,48 @@ public class NewContactActivity
 
         Intent intent = new Intent(getApplicationContext(), ContactActivity.class);
         startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  ShowDialog                                                                                *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Shows the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    private void showDialog()
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        if (!pDialog.isShowing())
+        {
+            pDialog.show();
+        }
+
+        // Log method exit
+        methodLogger.end();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  HideDialog                                                                                *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Hides the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    private void hideDialog()
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        if (pDialog.isShowing())
+        {
+            pDialog.dismiss();
+        }
 
         // Log method exit
         methodLogger.end();

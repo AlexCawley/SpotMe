@@ -1,5 +1,6 @@
 package com.example.e4977.spotme;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,8 +8,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ContactActivity
         extends AppCompatActivity
@@ -16,10 +28,11 @@ public class ContactActivity
     /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
      *--------------------------------------------------------------------------------------------*/
-    ArrayList<Contact> contacts;
-    LinearLayout contactViewWrapper;
-    SQLiteHandler db;
-    Button newContactButton;
+    private ArrayList<Contact> contacts;
+    private LinearLayout contactViewWrapper;
+    private SQLiteHandler db;
+    private Button newContactButton;
+    private ProgressDialog pDialog;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -43,14 +56,133 @@ public class ContactActivity
         db = new SQLiteHandler(this);
 
         /*----------------------------------------------------------------------------------------*
-         *  If the contacts array is null and the contact table exists in SQLite                  *
+         *  initialize progressDialog                                                             *
          *----------------------------------------------------------------------------------------*/
-        if (contacts == null && SQLiteHandler.doesTableExist(db.getReadableDatabase(),
-                                                             ContactDBContract.Contact.TABLE_NAME))
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+
+        // String used to cancel request if necessary
+        String tag_string_req = "req_contacts";
+
+        // Indicate the login process has started
+        pDialog.setMessage("Getting contacts ...");
+        showDialog();
+
+        // Create the new string request
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, AppConfig.URL_CONTACTS, new Response.Listener<String>()
         {
-            // Set the contacts array to all of the contacts held in the SQLite db
-            contacts = db.getAllContacts();
-        }
+
+            /*------------------------------------------------------------------------------------*
+             *  onResponse                                                                        *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onResponse(String response)
+            {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
+                // Log the JSON that was returned
+                methodLogger.d("Login Response: " + response.toString());
+
+                // Remove the processing view
+                hideDialog();
+
+                // Try to retrieve JSON and parse through it
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+
+                    // Check for errors in the JSON passed back
+                    boolean error = jObj.getBoolean("error");
+
+                    /*----------------------------------------------------------------------------*
+                     *  If there was no error found                                               *
+                     *----------------------------------------------------------------------------*/
+                    if (!error)
+                    {
+                        // Parse through the JSON data
+                        String uid = jObj.getString("uid");
+                        JSONObject contact = jObj.getJSONObject("contact");
+                        String name = contact.getString("name");
+                        String email = contact.getString("email");
+                        String created_at = contact.getString("created_at");
+                        String updated_at = contact.getString("updated_at");
+                    }
+
+                    /*----------------------------------------------------------------------------*
+                     *  Else if there was an error found                                          *
+                     *----------------------------------------------------------------------------*/
+                    else
+                    {
+                        // Notify the user
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                       errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                /*--------------------------------------------------------------------------------*
+                 * Catch any error in retrieving parsing etc JSON                                 *
+                 *--------------------------------------------------------------------------------*/
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Error finding contacts: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+                // Log method exit
+                methodLogger.end();
+
+            }
+        }, new Response.ErrorListener()
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  onErrorResponse                                                                   *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onErrorResponse(VolleyError error)
+            {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
+                // Notify the user
+                methodLogger.e("Error finding contacts: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                               error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+
+                // Log method exit
+                methodLogger.end();
+            }
+
+        })
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  getParams                                                                         *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            protected Map<String, String> getParams()
+            {
+                // Log method entry
+                MethodLogger methodLogger = new MethodLogger();
+
+                // create a new params object and add the user data
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user_id", SessionManager.getUser().getId());
+
+                // Log method exit
+                methodLogger.end();
+
+                // Return the user data
+                return params;
+            }
+
+        };
+
+        // Send the request string to the request queue to be sent to the PHP API
+        AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
 
         /*----------------------------------------------------------------------------------------*
          *  If the contacts array is not null                                                     *
@@ -164,6 +296,48 @@ public class ContactActivity
 
         Intent intent = new Intent(this, NewContactActivity.class);
         startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  ShowDialog                                                                                *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Shows the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    private void showDialog()
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        if (!pDialog.isShowing())
+        {
+            pDialog.show();
+        }
+
+        // Log method exit
+        methodLogger.end();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  HideDialog                                                                                *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Hides the progress dialog                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    private void hideDialog()
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        if (pDialog.isShowing())
+        {
+            pDialog.dismiss();
+        }
 
         // Log method exit
         methodLogger.end();
