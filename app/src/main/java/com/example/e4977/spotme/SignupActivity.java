@@ -32,7 +32,6 @@ public class SignupActivity extends Activity
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
-    private SQLiteHandler db;
     private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
@@ -61,11 +60,6 @@ public class SignupActivity extends Activity
          *----------------------------------------------------------------------------------------*/
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
-
-        /*----------------------------------------------------------------------------------------*
-         *  Initialize SQLite DB                                                                  *
-         *----------------------------------------------------------------------------------------*/
-        db = new SQLiteHandler(this);
 
         /*----------------------------------------------------------------------------------------*
          *  Initialize Session manager                                                            *
@@ -193,15 +187,14 @@ public class SignupActivity extends Activity
                     if (!error)
                     {
                         // Parse through the JSON
-                        String uid = jObj.getString("uid");
+                        String user_id = jObj.getString("user_id");
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
                         String created_at = user
                                 .getString("created_at");
 
-                        // Add the user to the db
-                        db.addUser(name, email, uid, created_at);
+                        sessionManager.setUser(new User(user_id, name, email, created_at));
 
                         // Indicate the success to the user
                         Toast.makeText(getApplicationContext(), "User successfully registered.", Toast.LENGTH_LONG).show();

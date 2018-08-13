@@ -14,7 +14,7 @@ public class MainMenu
      *--------------------------------------------------------------------------------------------*/
     private Button btnLogout;
     private Button btnContact;
-    private SQLiteHandler db;
+    private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -34,8 +34,10 @@ public class MainMenu
         btnLogout = findViewById(R.id.logoutButton);
         btnContact = findViewById(R.id.contactButton);
 
-        // Initializes the SQLite database
-        db = new SQLiteHandler(this);
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Session                                                                    *
+         *----------------------------------------------------------------------------------------*/
+        sessionManager = new SessionManager(getApplicationContext());
 
         /*----------------------------------------------------------------------------------------*
          *  Set Logout Button on click listener                                                   *
@@ -105,6 +107,8 @@ public class MainMenu
     {
         // Log method entry
         MethodLogger methodLogger = new MethodLogger();
+
+        sessionManager.logoutUser();
 
         Intent intent = new Intent(MainMenu.this, LoginActivity.class);
         startActivity(intent);

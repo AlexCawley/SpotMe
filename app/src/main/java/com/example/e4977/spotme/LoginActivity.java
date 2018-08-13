@@ -30,7 +30,6 @@ public class LoginActivity extends Activity
     private EditText inputEmail;
     private EditText inputPassword;
     private ProgressDialog pDialog;
-    private SQLiteHandler db;
     private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
@@ -58,11 +57,6 @@ public class LoginActivity extends Activity
          *----------------------------------------------------------------------------------------*/
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
-
-        /*----------------------------------------------------------------------------------------*
-         *  Initialize SQLite DB                                                                  *
-         *----------------------------------------------------------------------------------------*/
-        db = new SQLiteHandler(getApplicationContext());
 
         /*----------------------------------------------------------------------------------------*
          *  Initialize Session                                                                    *
@@ -190,14 +184,16 @@ public class LoginActivity extends Activity
                         sessionManager.setLogin(true);
 
                         // Parse through the JSON data
-                        String uid = jObj.getString("uid");
+                        String user_id = jObj.getString("user_id");
                         JSONObject user = jObj.getJSONObject("user");
                         String name = user.getString("name");
                         String email = user.getString("email");
                         String created_at = user.getString("created_at");
 
-                        // Add the new user data to the SQLite db
-                        db.addUser(name, email, uid, created_at);
+                        // Add the new user data the session manager
+                        sessionManager.setUser(new User(user_id, name, email, created_at));
+
+                        methodLogger.d(String.format("===========USERID=========== %s", sessionManager.getUserId()));
 
                         // Take the app to the main menu
                         routeToMainMenu();

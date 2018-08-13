@@ -13,7 +13,7 @@ public class AppConfig
     public static String URL_CONTACTS = "http://192.168.0.23/android_login_api/contacts.php";
 
     // Server new contact url
-    public static String URL_NEW_CONTACT = "http://192.168.0.23/android_login_api/new_contacts.php";
+    public static String URL_NEW_CONTACT = "http://192.168.0.23/android_login_api/new_contact.php";
 
     // Determines if method entries and exits should be logged
     public static Boolean DEUBUG_MODE = true;

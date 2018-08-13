@@ -31,9 +31,9 @@ public class NewContactActivity
     private EditText nameField;
     private EditText emailAddressField;
     private EditText phoneNumberField;
-    private SQLiteHandler db;
     private ProgressDialog pDialog;
     private Context mContext;
+    private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -47,9 +47,6 @@ public class NewContactActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_contact_view);
 
-        // Initializes the SQLite database
-        db = new SQLiteHandler(this);
-
         /*----------------------------------------------------------------------------------------*
          *  Initialize Views and context                                                          *
          *----------------------------------------------------------------------------------------*/
@@ -58,6 +55,11 @@ public class NewContactActivity
         phoneNumberField = findViewById(R.id.phoneNumberField);
         addContactButton = findViewById(R.id.addContactButton);
         mContext = this;
+
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Session                                                                    *
+         *----------------------------------------------------------------------------------------*/
+        sessionManager = new SessionManager(getApplicationContext());
 
         /*----------------------------------------------------------------------------------------*
          *  Set addContact Button on click listener                                               *
@@ -139,7 +141,7 @@ public class NewContactActivity
                                 else
                                 {
                                     // Notify the user
-                                    String errorMsg = jObj.getString("error_msg");
+                                    String errorMsg = jObj.getString("message");
                                     Toast.makeText(getApplicationContext(),
                                                    errorMsg, Toast.LENGTH_LONG).show();
                                 }
@@ -195,12 +197,13 @@ public class NewContactActivity
                             // create a new params object and add the contact data
                             Map<String, String> params = new HashMap<String, String>();
 
-                            params.put("user_id", SessionManager.getUser().getId());
+                            // Add the params to the volley request
+                            params.put("user_id", sessionManager.getUserId());
+
+                            methodLogger.d(String.format("===========USERID=========== %s", sessionManager.getUserId()));
+
                             params.put("name", name);
-                            if (emailAddress != "")
-                            {
-                                params.put("email", emailAddress);
-                            }
+                            params.put("email", emailAddress);
 
                             // Log method exit
                             methodLogger.end();
@@ -210,6 +213,9 @@ public class NewContactActivity
                         }
 
                     };
+
+                    // Send the request string to the request queue to be sent to the PHP API
+                    AppController.getInstance().addToRequestQueue(stringRequest, tag_string_req);
 
                     // Send the app to the contact activity
                     routeToContactPage();

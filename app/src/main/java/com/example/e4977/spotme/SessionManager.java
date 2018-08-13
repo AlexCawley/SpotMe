@@ -14,6 +14,7 @@ public class SessionManager
      *--------------------------------------------------------------------------------------------*/
     private static final String PREF_NAME = "SpotMeLogin";
     private static final String KEY_IS_LOGGEDIN = "isLoggedIn";
+    private static final String KEY_USER_ID = "userId";
 
     /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
@@ -36,17 +37,6 @@ public class SessionManager
         pref = _context.getSharedPreferences(PREF_NAME, PRIVATE_MODE);
         editor = pref.edit();
 
-        /*----------------------------------------------------------------------------------------*
-         *  If the user is logged in                                                              *
-         *----------------------------------------------------------------------------------------*/
-        if (isLoggedIn())
-        {
-            // Set the user field that can be accessed throughout the app
-            SQLiteHandler db = new SQLiteHandler(context);
-            HashMap<String, String> userMap = db.getUserDetails();
-            user = new User(userMap.get("uid"), userMap.get("name"), userMap.get("email"), null);
-        }
-
         // Log method exit
         methodLogger.end();
     }
@@ -68,13 +58,50 @@ public class SessionManager
         methodLogger.end();
     }
 
-    public static User getUser()
+    public String getUserId()
     {
-        return user;
+        return pref.getString(KEY_USER_ID, "");
+    }
+
+    public void setUser(User user)
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        // Set the userID
+        editor.putString(KEY_USER_ID, user.getId());
+        editor.commit();
+
+        // Set the user object
+        this.user = user;
+
+        // Log method exit
+        methodLogger.end();
     }
 
     public boolean isLoggedIn()
     {
         return pref.getBoolean(KEY_IS_LOGGEDIN, false);
     }
+
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  LogoutUser                                                                                *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Resets the user fields and id in the preferences                                          *
+     *--------------------------------------------------------------------------------------------*/
+    public void logoutUser()
+    {
+        // Remove the user ID from the preferences
+        editor.remove(KEY_USER_ID);
+
+        // Set login to false
+        this.setLogin(false);
+
+        // Make the user null
+        user = null;
+    }
+
 }

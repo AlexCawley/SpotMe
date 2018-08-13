@@ -1,11 +1,5 @@
 package com.example.e4977.spotme;
 
-import android.util.Log;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 public class User
 {
     /*--------------------------------------------------------------------------------------------*
@@ -14,13 +8,12 @@ public class User
     public String id;
     public String userName;
     public String email;
-    public String password;
-    public String date;
+    public String createdAt;
 
     /*--------------------------------------------------------------------------------------------*
      *  Constructor                                                                               *
      *--------------------------------------------------------------------------------------------*/
-    public User(String id, String userName, String email, String password)
+    public User(String id, String userName, String email, String createdAt)
     {
         // Log method entry
         MethodLogger methodLogger = new MethodLogger();
@@ -28,24 +21,7 @@ public class User
         this.id = id;
         this.userName = userName;
         this.email = email;
-        this.password = password;
-
-        try
-        {
-            Date today = Calendar.getInstance().getTime();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            String dateString = simpleDateFormat.format(today);
-            this.date = dateString;
-        }
-        catch (Exception e)
-        {
-            methodLogger.e("Error: " + e);
-
-            // Log method exit
-            methodLogger.end();
-
-            return;
-        }
+        this.createdAt = createdAt;
 
         // Log method exit
         methodLogger.end();

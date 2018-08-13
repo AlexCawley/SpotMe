@@ -30,9 +30,9 @@ public class ContactActivity
      *--------------------------------------------------------------------------------------------*/
     private ArrayList<Contact> contacts;
     private LinearLayout contactViewWrapper;
-    private SQLiteHandler db;
     private Button newContactButton;
     private ProgressDialog pDialog;
+    private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
      *  onCreate                                                                                  *
@@ -52,8 +52,10 @@ public class ContactActivity
         contactViewWrapper = findViewById(R.id.contactViewWrapper);
         newContactButton = findViewById(R.id.newContactButton);
 
-        // Initializes the SQLite database
-        db = new SQLiteHandler(this);
+        /*----------------------------------------------------------------------------------------*
+         *  Initialize Session                                                                    *
+         *----------------------------------------------------------------------------------------*/
+        sessionManager = new SessionManager(getApplicationContext());
 
         /*----------------------------------------------------------------------------------------*
          *  initialize progressDialog                                                             *
@@ -82,7 +84,7 @@ public class ContactActivity
                 MethodLogger methodLogger = new MethodLogger();
 
                 // Log the JSON that was returned
-                methodLogger.d("Login Response: " + response.toString());
+                methodLogger.d("Contact query Response: " + response.toString());
 
                 // Remove the processing view
                 hideDialog();
@@ -170,7 +172,7 @@ public class ContactActivity
 
                 // create a new params object and add the user data
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("user_id", SessionManager.getUser().getId());
+                params.put("user_id", sessionManager.getUserId());
 
                 // Log method exit
                 methodLogger.end();
