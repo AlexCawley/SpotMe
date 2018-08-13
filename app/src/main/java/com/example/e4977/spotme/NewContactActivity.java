@@ -55,6 +55,16 @@ public class NewContactActivity
         phoneNumberField = findViewById(R.id.phoneNumberField);
         addContactButton = findViewById(R.id.addContactButton);
         mContext = this;
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.titlebar);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Setup the toolbar                                                                     *
+         *----------------------------------------------------------------------------------------*/
+        setSupportActionBar(toolbar);
+
+        // Enable the back button to take the user back to the home menu
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         /*----------------------------------------------------------------------------------------*
          *  Initialize Session                                                                    *

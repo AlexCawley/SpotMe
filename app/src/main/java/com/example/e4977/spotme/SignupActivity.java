@@ -194,6 +194,7 @@ public class SignupActivity extends Activity
                         String created_at = user
                                 .getString("created_at");
 
+                        // Update the session manager with the new user info
                         sessionManager.setUser(new User(user_id, name, email, created_at));
 
                         // Indicate the success to the user

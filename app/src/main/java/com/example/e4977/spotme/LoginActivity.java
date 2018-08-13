@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.android.volley.Request.Method;
 import com.android.volley.Response;
@@ -20,7 +22,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LoginActivity extends Activity
+public class LoginActivity extends AppCompatActivity
 {
     /*--------------------------------------------------------------------------------------------*
      *  Member variables                                                                          *
@@ -51,6 +53,12 @@ public class LoginActivity extends Activity
         inputPassword = findViewById(R.id.passwordField);
         btnLogin = findViewById(R.id.loginButton);
         btnLinkToRegister = findViewById(R.id.signupButton);
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.titlebar);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Setup the toolbar                                                                     *
+         *----------------------------------------------------------------------------------------*/
+        setSupportActionBar(toolbar);
 
         /*----------------------------------------------------------------------------------------*
          *  initialize progressDialog                                                             *

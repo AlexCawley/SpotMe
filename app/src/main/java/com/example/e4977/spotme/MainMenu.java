@@ -33,6 +33,12 @@ public class MainMenu
          *----------------------------------------------------------------------------------------*/
         btnLogout = findViewById(R.id.logoutButton);
         btnContact = findViewById(R.id.contactButton);
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.titlebar);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Setup the toolbar                                                                     *
+         *----------------------------------------------------------------------------------------*/
+        setSupportActionBar(toolbar);
 
         /*----------------------------------------------------------------------------------------*
          *  Initialize Session                                                                    *

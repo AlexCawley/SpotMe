@@ -1,5 +1,6 @@
 package com.example.e4977.spotme;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -51,6 +52,16 @@ public class ContactActivity
          *----------------------------------------------------------------------------------------*/
         contactViewWrapper = findViewById(R.id.contactViewWrapper);
         newContactButton = findViewById(R.id.newContactButton);
+        android.support.v7.widget.Toolbar toolbar = findViewById(R.id.titlebar);
+
+        /*----------------------------------------------------------------------------------------*
+         *  Setup the toolbar                                                                     *
+         *----------------------------------------------------------------------------------------*/
+        setSupportActionBar(toolbar);
+
+        // Enable the back button to take the user back to the home menu
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         /*----------------------------------------------------------------------------------------*
          *  Initialize Session                                                                    *
