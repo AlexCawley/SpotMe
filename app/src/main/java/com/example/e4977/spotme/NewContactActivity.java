@@ -210,7 +210,8 @@ public class NewContactActivity
                             // Add the params to the volley request
                             params.put("user_id", sessionManager.getUserId());
 
-                            methodLogger.d(String.format("===========USERID=========== %s", sessionManager.getUserId()));
+                            // Log the user id that aws used to create the new contact
+                            methodLogger.d(String.format("User ID: %s", sessionManager.getUserId()));
 
                             params.put("name", name);
                             params.put("email", emailAddress);

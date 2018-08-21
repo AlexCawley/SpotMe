@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity
                         // Add the new user data the session manager
                         sessionManager.setUser(new User(user_id, name, email, created_at));
 
-                        methodLogger.d(String.format("===========USERID=========== %s", sessionManager.getUserId()));
+                        methodLogger.d(String.format("User ID: %s", sessionManager.getUserId()));
 
                         // Take the app to the main menu
                         routeToMainMenu();

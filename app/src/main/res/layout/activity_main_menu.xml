@@ -25,12 +25,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="Contacts"
-                android:id="@+id/contactButton"/>
+                android:id="@+id/contactButton" />
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="Spots" />
+                android:text="Transactions"
+                android:id="@+id/transactionButton" />
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

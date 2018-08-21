@@ -1,6 +1,5 @@
 package com.example.e4977.spotme;
 
-import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;

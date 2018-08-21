@@ -41,8 +41,20 @@
                 android:value="com.example.e4977.spotme.ContactActivity" />
         </activity>
         <activity
+            android:label="@string/new_transaction"
+            android:name=".TransactionActivity" >
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.e4977.spotme.ContactActivity" />
+        </activity>
+        <activity
             android:label="@string/app_name"
             android:name=".SignupActivity" >
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.e4977.spotme.LoginActivity" />
         </activity>
     </application>
 

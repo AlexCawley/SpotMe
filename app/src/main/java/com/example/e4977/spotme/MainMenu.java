@@ -14,6 +14,7 @@ public class MainMenu
      *--------------------------------------------------------------------------------------------*/
     private Button btnLogout;
     private Button btnContact;
+    private Button btnTransaction;
     private SessionManager sessionManager;
 
     /*--------------------------------------------------------------------------------------------*
@@ -33,6 +34,7 @@ public class MainMenu
          *----------------------------------------------------------------------------------------*/
         btnLogout = findViewById(R.id.logoutButton);
         btnContact = findViewById(R.id.contactButton);
+        btnTransaction = findViewById(R.id.transactionButton);
         android.support.v7.widget.Toolbar toolbar = findViewById(R.id.titlebar);
 
         /*----------------------------------------------------------------------------------------*
@@ -79,6 +81,23 @@ public class MainMenu
             }
         });
 
+        /*----------------------------------------------------------------------------------------*
+         *  Set Transaction Button on click listener                                              *
+         *----------------------------------------------------------------------------------------*/
+        btnTransaction.setOnClickListener(new View.OnClickListener()
+        {
+
+            /*------------------------------------------------------------------------------------*
+             *  OnClick                                                                           *
+             *------------------------------------------------------------------------------------*/
+            @Override
+            public void onClick(View v)
+            {
+                // Send the app to the transaction page
+                routeToTransactionPage();
+            }
+        });
+
         // Log method exit
         methodLogger.end();
     }
@@ -96,6 +115,25 @@ public class MainMenu
         MethodLogger methodLogger = new MethodLogger();
 
         Intent intent = new Intent(this, ContactActivity.class);
+        startActivity(intent);
+
+        // Log method exit
+        methodLogger.end();
+    }
+
+    /*--------------------------------------------------------------------------------------------*
+     *                                                                                            *
+     *  RouteToTransactionPage                                                                    *
+     *                                                                                            *
+     *--------------------------------------------------------------------------------------------*
+     *  Sends app to contact page                                                                 *
+     *--------------------------------------------------------------------------------------------*/
+    public void routeToTransactionPage()
+    {
+        // Log method entry
+        MethodLogger methodLogger = new MethodLogger();
+
+        Intent intent = new Intent(this, TransactionActivity.class);
         startActivity(intent);
 
         // Log method exit
